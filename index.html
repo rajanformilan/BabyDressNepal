@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BabyDressNepal — Cheap & Quality Baby Dresses</title>
+<style>
+  :root{
+    --accent:#ff6f61;
+    --muted:#f7f3f1;
+    --card:#ffffff;
+    --text:#222;
+    --radius:12px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.06);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, system-ui, Arial, sans-serif;
+    background:linear-gradient(180deg,#fffefd 0%, #fff7f5 100%);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  header{
+    background:var(--accent);
+    color:#fff;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header .brand{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:44px;height:44px;border-radius:10px;background:#fff8f6;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);
+    box-shadow:var(--shadow);
+  }
+  header nav a{ color:#fff;text-decoration:none;font-weight:600;margin-left:10px;}
+  .container{max-width:1100px;margin:18px auto;padding:0 16px;}
+  .hero{
+    background:linear-gradient(90deg, rgba(255,111,97,0.06), rgba(255,154,139,0.03));
+    padding:18px;border-radius:16px;margin-bottom:18px;display:flex;gap:18px;align-items:center;justify-content:space-between;
+  }
+  .hero .left h1{margin:0;font-size:20px}
+  .hero .left p{margin:6px 0 0;color:#666}
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:18px;
+  }
+  @media (max-width:900px){ .grid{ grid-template-columns:1fr; } .hero{flex-direction:column;align-items:flex-start} }
+  .catalog{
+    display:grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap:14px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    transition:transform .14s;
+  }
+  .card:hover{ transform:translateY(-6px) }
+  .card img{width:100%;height:220px;object-fit:cover}
+  .card .info{padding:12px;flex:1;display:flex;flex-direction:column;gap:8px}
+  .price{color:var(--accent);font-weight:700}
+  .actions{display:flex;gap:8px;margin-top:auto;align-items:center}
+  .btn{
+    border:0;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;
+  }
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:transparent;border:1px solid #eee}
+  aside{
+    background:var(--card);padding:12px;border-radius:12px;box-shadow:var(--shadow);
+    height:fit-content;
+  }
+  .cart-list{max-height:360px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .cart-item{display:flex;gap:8px;align-items:center}
+  .cart-item img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+  footer{margin:28px 0;text-align:center;color:#777;font-size:13px}
+  input[type="search"]{padding:8px 12px;border-radius:10px;border:1px solid #eee;width:100%;max-width:320px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .badge{background:#fff;padding:6px 8px;border-radius:999px;border:1px solid #f0e9e8;font-size:13px}
+  .small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">BD</div>
+    <div>
+      <div style="font-weight:800">BabyDressNepal</div>
+      <div style="font-size:12px;opacity:.9">Cheap • High Quality • Fast Service</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <a href="admin.html" style="color:#fff;font-weight:700;text-decoration:none">Admin</a>
+    <div id="cart-count" style="background:#fff2f0;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700">0</div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero" aria-label="hero">
+    <div class="left">
+      <h1>Affordable & Quality Baby Dresses — starting Rs. 300</h1>
+      <p class="small">New arrival: soft cotton frocks, party dresses & rompers — sizes 0-24 months.</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <input id="search" type="search" placeholder="Search products, e.g. 'frock'">
+      <div class="filters">
+        <select id="filter-category" class="badge">
+          <option value="">All categories</option>
+        </select>
+        <select id="filter-size" class="badge">
+          <option value="">All sizes</option>
+          <option>0-3M</option><option>3-6M</option><option>6-12M</option><option>12-24M</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section>
+      <div id="catalog" class="catalog" aria-live="polite"></div>
+    </section>
+
+    <aside>
+      <h3 style="margin:0 0 8px 0">Your Cart</h3>
+      <div class="cart-list" id="cart-list" aria-live="polite"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="small">Total</div>
+        <div style="font-weight:800">Rs. <span id="total-amt">0</span></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-primary" id="checkout">Checkout (simulate)</button>
+        <button class="btn btn-ghost" id="clear-cart">Clear</button>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#666">Contact: 9800000000 • support@babydressnepal.com</div>
+    </aside>
+  </div>
+
+  <footer>&copy; 2025 BabyDressNepal — Built with ♥</footer>
+</main>
+
+<script>
+/*
+  Data model:
+  products: localStorage key "bd_products" -> array of {id, name, price, category, sizes[], stock, imageBase64, description}
+  cart: localStorage key "bd_cart" -> array of {productId, qty}
+*/
+
+// Utilities
+const $ = sel => document.querySelector(sel);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+// load/save
+function loadProducts(){ return JSON.parse(localStorage.getItem('bd_products')||'[]') }
+function saveProducts(p){ localStorage.setItem('bd_products', JSON.stringify(p)) }
+function loadCart(){ return JSON.parse(localStorage.getItem('bd_cart')||'[]') }
+function saveCart(c){ localStorage.setItem('bd_cart', JSON.stringify(c)) }
+
+// seed demo products if empty (only first time)
+if(!localStorage.getItem('bd_products')){
+  const demo = [
+    {id:uid(), name:"Floral Baby Frock", price:350, category:"Frock", sizes:["0-3M","3-6M"], stock:12, imageBase64:"", description:"Soft cotton floral frock"},
+    {id:uid(), name:"Pink Party Dress", price:500, category:"Party", sizes:["6-12M","12-24M"], stock:5, imageBase64:"", description:"Gorgeous party dress"},
+    {id:uid(), name:"Casual Cotton Romper", price:300, category:"Rompers", sizes:["0-3M","3-6M","6-12M"], stock:20, imageBase64:"", description:"Comfortable daily wear romper"}
+  ];
+  saveProducts(demo);
+}
+
+// render catalog
+const catalogEl = $('#catalog');
+const cartListEl = $('#cart-list');
+const totalAmtEl = $('#total-amt');
+const cartCountEl = $('#cart-count');
+const searchInput = $('#search');
+const filterCategory = $('#filter-category');
+const filterSize = $('#filter-size');
+
+function buildCategoryOptions(products){
+  const cats = Array.from(new Set(products.map(p=>p.category||'Other')));
+  filterCategory.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+function renderProducts(){
+  const q = searchInput.value.trim().toLowerCase();
+  let products = loadProducts();
+  buildCategoryOptions(products);
+  // filters
+  const cat = filterCategory.value;
+  const sz = filterSize.value;
+  products = products.filter(p=>{
+    if(cat && p.category !== cat) return false;
+    if(sz && (!p.sizes || !p.sizes.includes(sz))) return false;
+    if(!q) return true;
+    return (p.name + ' ' + (p.description||'') + ' ' + (p.category||'')).toLowerCase().includes(q);
+  });
+
+  if(products.length === 0){
+    catalogEl.innerHTML = '<div style="padding:18px;color:#666;background:#fff;border-radius:12px">No products found. Add some from the Admin panel.</div>';
+    return;
+  }
+
+  catalogEl.innerHTML = products.map(p=>`
+    <article class="card" data-id="${p.id}">
+      <img src="${p.imageBase64 || placeholderDataURL()}" alt="${escapeHtml(p.name)}">
+      <div class="info">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>${escapeHtml(p.name)}</strong><div class="small">${escapeHtml(p.category||'')}</div></div>
+          <div class="price">Rs. ${p.price}</div>
+        </div>
+        <div class="small">${escapeHtml(p.description||'')}</div>
+        <div class="actions">
+          <select class="size-select" aria-label="size">
+            ${ (p.sizes||[]).map(s=>`<option>${s}</option>`).join('') }
+          </select>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary" data-act="add" ${p.stock<=0 ? 'disabled' : ''}>Add to cart</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+  attachCatalogHandlers();
+}
+
+function placeholderDataURL(){
+  // simple tiny SVG placeholder
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600'><rect width='100%' height='100%' fill='#fff8f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#ffd6cf' font-size='28'>No Image</text></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+function escapeHtml(s=''){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') }
+
+// attach add-to-cart listeners
+function attachCatalogHandlers(){
+  document.querySelectorAll('#catalog article.card').forEach(card=>{
+    const id = card.getAttribute('data-id');
+    const btn = card.querySelector('button[data-act="add"]');
+    btn && btn.addEventListener('click', ()=>{
+      const sizeSelect = card.querySelector('.size-select');
+      addToCart(id, sizeSelect ? sizeSelect.value : '');
+    });
+  });
+}
+
+// cart functions
+function addToCart(productId, size){
+  const products = loadProducts();
+  const p = products.find(x=>x.id===productId);
+  if(!p) return alert('Product not found');
+  if(p.stock<=0) return alert('Out of stock');
+  const cart = loadCart();
+  const existing = cart.find(i=>i.productId===productId && i.size===size);
+  if(existing) existing.qty++;
+  else cart.push({productId, size, qty:1});
+  saveCart(cart);
+  renderCart();
+  alert(p.name + ' added to cart');
+}
+function renderCart(){
+  const cart = loadCart();
+  const products = loadProducts();
+  if(cart.length === 0){
+    cartListEl.innerHTML = '<div style="color:#999">Your cart is empty</div>';
+    totalAmtEl.textContent = '0';
+    cartCountEl.textContent = '0';
+    return;
+  }
+  let total = 0;
+  cartListEl.innerHTML = cart.map(item=>{
+    const p = products.find(x=>x.id===item.productId) || {};
+    const subtotal = (p.price||0) * item.qty;
+    total += subtotal;
+    return `<div class="cart-item" data-id="${item.productId}" data-size="${item.size}">
+      <img src="${p.imageBase64||placeholderDataURL()}" alt="${escapeHtml(p.name)}">
+      <div style="flex:1">
+        <div style="font-weight:700">${escapeHtml(p.name)}</div>
+        <div class="small">Size: ${escapeHtml(item.size||'-')} • Rs.${p.price} × ${item.qty}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <div>Rs. ${subtotal}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost small" data-act="dec">-</button>
+          <button class="btn btn-ghost small" data-act="inc">+</button>
+          <button class="btn btn-ghost small" data-act="rm">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  totalAmtEl.textContent = total;
+  cartCountEl.textContent = cart.reduce((s,i)=>s+i.qty,0);
+  attachCartHandlers();
+}
+
+function attachCartHandlers(){
+  document.querySelectorAll('.cart-item').forEach(el=>{
+    const id = el.getAttribute('data-id');
+    const size = el.getAttribute('data-size');
+    el.querySelector('[data-act="inc"]').addEventListener('click', ()=>{
+      changeQty(id,size,1);
+    });
+    el.querySelector('[data-act="dec"]').addEventListener('click', ()=>{
+      changeQty(id,size,-1);
+    });
+    el.querySelector('[data-act="rm"]').addEventListener('click', ()=>{
+      removeFromCart(id,size);
+    });
+  });
+}
+
+function changeQty(productId,size,delta){
+  const cart = loadCart();
+  const idx = cart.findIndex(i=>i.productId===productId && i.size===size);
+  if(idx === -1) return;
+  cart[idx].qty += delta;
+  if(cart[idx].qty <= 0) cart.splice(idx,1);
+  saveCart(cart);
+  renderCart();
+}
+function removeFromCart(productId,size){
+  let cart = loadCart();
+  cart = cart.filter(i=>!(i.productId===productId && i.size===size));
+  saveCart(cart);
+  renderCart();
+}
+
+// checkout simulate: reduce stock
+$('#checkout').addEventListener('click', ()=>{
+  const cart = loadCart();
+  if(cart.length===0) return alert('Cart empty');
+  if(!confirm('Simulate checkout? This will reduce stock quantities.')) return;
+  let products = loadProducts();
+  for(const item of cart){
+    const p = products.find(x=>x.id===item.productId);
+    if(p) p.stock = Math.max(0, p.stock - item.qty);
+  }
+  saveProducts(products);
+  localStorage.removeItem('bd_cart');
+  renderProducts();
+  renderCart();
+  alert('Order simulated — stock updated. For real orders connect a backend.');
+});
+
+// clear cart
+$('#clear-cart').addEventListener('click', ()=>{
+  if(confirm('Clear cart?')){ localStorage.removeItem('bd_cart'); renderCart(); }
+});
+
+// search & filters
+searchInput.addEventListener('input', ()=>renderProducts());
+filterCategory.addEventListener('change', ()=>renderProducts());
+filterSize.addEventListener('change', ()=>renderProducts());
+
+// helper to ensure product images from admin render even if empty: placeholderDataURL used above
+
+// init
+renderProducts();
+renderCart();
+
+// small helper: allow product image to be added later via admin; for demo we could fetch external images but we keep offline.
+
+</script>
+</body>
+</html>

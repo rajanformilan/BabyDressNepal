@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Buy Baby Dresses — Pay & Confirm</title>
+<style>
+  :root{--accent:#ff6f61;--muted:#f5efee}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,Arial,sans-serif;margin:0;background:#fffaf8;color:#222}
+  header{background:var(--accent);color:#fff;padding:14px;text-align:center}
+  header h1{margin:0;font-size:20px}
+  .container{max-width:820px;margin:16px auto;padding:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);flex:1;min-width:240px}
+  .method{display:flex;gap:10px;align-items:center}
+  .qr{width:88px;height:88px;border-radius:8px;object-fit:cover;border:1px solid #eee}
+  .muted{color:#666;font-size:14px}
+  label{display:block;margin-top:10px;font-weight:600;font-size:14px}
+  input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin-top:6px}
+  input[type=file]{padding:6px}
+  button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;margin-top:12px}
+  .small{font-size:13px;color:#666}
+  .center{text-align:center}
+  footer{padding:12px;text-align:center;color:#777;font-size:13px;margin-top:12px}
+  .hint{background:#fff6f6;padding:8px;border-radius:8px;border:1px dashed #ffd6cf;font-size:14px}
+  .preview-img{max-width:120px;max-height:160px;border-radius:8px;border:1px solid #eee;object-fit:cover}
+  @media (max-width:640px){ .row{flex-direction:column} .method{flex-direction:column;align-items:flex-start} .qr{width:120px;height:120px} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BabyDressNepal — Pay & Confirm</h1>
+  <div style="font-size:13px;opacity:.95">Send payment to any method below, then confirm by uploading screenshot</div>
+</header>
+
+<main class="container">
+
+  <section class="row" aria-label="payment-methods">
+    <div class="card">
+      <h3 style="margin:0">Esewa</h3>
+      <div class="method" style="margin-top:8px">
+        <img id="esewaQr" class="qr" src="esewa.jpg" alt="Esewa QR">
+        <div>
+          <div class="muted">Account / Mobile:</div>
+          <div style="font-weight:800;margin-top:6px" id="esewa-number">9812891484</div>
+          <div class="small muted" style="margin-top:8px">Add note: <strong>Product name</strong> when transferring</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0">Khalti</h3>
+      <div class="method" style="margin-top:8px">
+        <img id="khaltiQr" class="qr" src="khalti.jpg" alt="Khalti QR">
+        <div>
+          <div class="muted">Khalti ID:</div>
+          <div style="font-weight:800;margin-top:6px" id="khalti-number">9819210050</div>
+          <div class="small muted" style="margin-top:8px">Enter your name in note for easy match</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0">IME Pay</h3>
+      <div class="method" style="margin-top:8px">
+        <img id="imeQr" class="qr" src="imepay.jpg" alt="IMEPay QR">
+        <div>
+          <div class="muted">IME Pay No:</div>
+          <div style="font-weight:800;margin-top:6px" id="ime-number">9826607546</div>
+          <div class="small muted" style="margin-top:8px">Write product in note.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0">Bank Transfer</h3>
+      <div class="muted small" style="margin-top:8px">Bank, Account name & A/C no.</div>
+      <div style="margin-top:8px;font-weight:800" id="bank-name">Nabil Bank</div>
+      <div class="small" id="bank-account">A/C: 05410017510742 (Name: Rajan Kandel)</div>
+      <div class="small muted" style="margin-top:8px">Please include customer's name in transfer remark</div>
+    </div>
+  </section>
+
+  <section style="margin-top:18px" aria-label="instructions">
+    <div class="hint">
+      <strong>How to buy:</strong> 1) Choose a product from our chat or post. 2) Pay using any method above. 3) Return here and fill the confirmation form — upload the screenshot of payment. 4) We will verify and ship using a courier service. You will get tracking number screenshot after pickup.
+    </div>
+  </section>
+
+  <section style="margin-top:18px">
+    <div class="card">
+      <h3 style="margin:0">Payment Confirmation Form</h3>
+      <form id="orderForm" style="margin-top:10px">
+        <label>Buyer Name<input name="buyerName" id="buyerName" required placeholder="Full name"></label>
+        <label>Phone (customer contact)<input name="phone" id="phone" required placeholder="98XXXXXXXX"></label>
+        <label>Delivery Address<textarea name="address" id="address" rows="2" placeholder="Street, Ward, City" required></textarea></label>
+        <label>Product(s) (name & qty)<input name="items" id="items" required placeholder="Pink Frock - 1"></label>
+        <label>Paid Via<select id="paidVia" required>
+          <option value="">Select method</option>
+          <option>Esewa</option>
+          <option>Khalti</option>
+          <option>IME Pay</option>
+          <option>Bank Transfer</option>
+        </select></label>
+
+        <label>Amount Paid (Rs.)<input id="amount" type="number" min="1" required></label>
+
+        <label>Upload Payment Screenshot (required)
+          <input id="screenshot" type="file" accept="image/*" required>
+        </label>
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <img id="ss-preview" class="preview-img" src="" alt="" style="display:none">
+          <div>
+            <div class="small muted">Preview of uploaded screenshot</div>
+          </div>
+        </div>
+
+        <label style="margin-top:10px">Any note (optional)<input id="note" placeholder="Any extra note"></label>
+
+        <button type="submit">Send Confirmation</button>
+      </form>
+
+      <div id="result" class="center small" style="margin-top:12px;color:green;display:none">Your confirmation has been saved — we will verify it and contact you.</div>
+      <div style="margin-top:10px" class="small muted">Tip: Keep the payment screenshot until you receive confirmation.</div>
+    </div>
+  </section>
+
+  <section style="margin-top:18px" class="card">
+    <h3 style="margin:0">Need help?</h3>
+    <div class="small muted" style="margin-top:8px">Contact: 9800000000 (WhatsApp) • support@babydressnepal.com</div>
+    <div style="margin-top:8px">
+      <small class="muted">Admin panel: open <strong>admin.html</strong> in the same folder to view and export orders.</small>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 BabyDressNepal — Keep your payment screenshots until confirmed.
+  </footer>
+</main>
+
+<script>
+/*
+  Behavior:
+  - When user uploads screenshot, show preview and convert to base64.
+  - On form submit create order object {id,timestamp,buyerName,phone,address,items,paidVia,amount,note,imageBase64,status}
+  - Save to localStorage under key "bd_orders"
+  - Show success message
+*/
+
+const ssInput = document.getElementById('screenshot');
+const ssPreview = document.getElementById('ss-preview');
+let uploadedBase64 = '';
+
+// preview screenshot
+ssInput.addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if(!f) { ssPreview.style.display='none'; uploadedBase64=''; return; }
+  if(f.size > 6_000_000){ alert('Please use screenshot under ~6MB'); ssInput.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedBase64 = reader.result;
+    ssPreview.src = uploadedBase64;
+    ssPreview.style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+});
+
+function loadOrders(){ return JSON.parse(localStorage.getItem('bd_orders')||'[]') }
+function saveOrders(arr){ localStorage.setItem('bd_orders', JSON.stringify(arr)) }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7) }
+
+document.getElementById('orderForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  // validate
+  if(!uploadedBase64){ alert('Please upload a payment screenshot'); return; }
+  const order = {
+    id: uid(),
+    timestamp: new Date().toISOString(),
+    buyerName: document.getElementById('buyerName').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    items: document.getElementById('items').value.trim(),
+    paidVia: document.getElementById('paidVia').value,
+    amount: Number(document.getElementById('amount').value) || 0,
+    note: document.getElementById('note').value.trim(),
+    screenshot: uploadedBase64,
+    status: 'pending' // admin can change to confirmed
+  };
+  const arr = loadOrders();
+  arr.unshift(order);
+  saveOrders(arr);
+  // reset
+  document.getElementById('orderForm').reset();
+  ssPreview.style.display='none';
+  uploadedBase64 = '';
+  document.getElementById('result').style.display = 'block';
+  setTimeout(()=>{ document.getElementById('result').style.display='none'; }, 4000);
+});
+
+/* --- OPTIONAL: allow site owner to prefill your real payment details from browser prompt (for first time) --- */
+(function loadSavedDetails(){
+  const saved = JSON.parse(localStorage.getItem('bd_payment_info')||'{}');
+  if(saved.esewaNumber) document.getElementById('esewa-number').textContent = saved.esewaNumber;
+  if(saved.khaltiNumber) document.getElementById('khalti-number').textContent = saved.khaltiNumber;
+  if(saved.imeNumber) document.getElementById('ime-number').textContent = saved.imeNumber;
+  if(saved.bankName) document.getElementById('bank-name').textContent = saved.bankName;
+  if(saved.bankAccount) document.getElementById('bank-account').textContent = saved.bankAccount;
+})();
+</script>
+</body>
+</html>

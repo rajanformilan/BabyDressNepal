@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — BabyDressNepal</title>
+<style>
+  body{font-family:Inter,system-ui,Arial,sans-serif;background:#faf7f6;margin:0;color:#222}
+  header{background:#ff6f61;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+  .container{max-width:1000px;margin:18px auto;padding:16px}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:18px}
+  .card{background:#fff;padding:14px;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,0.06)}
+  label{display:block;font-size:13px;margin-top:8px;color:#555}
+  input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid #eee;margin-top:6px}
+  button{background:#ff6f61;border:0;color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  .muted{font-size:13px;color:#777}
+  .product-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .product-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;border:1px solid #f2e9e8}
+  .product-row img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+  .actions{display:flex;gap:8px;margin-left:auto}
+  .btn-ghost{background:transparent;border:1px solid #eee;color:#333;padding:6px 8px;border-radius:8px}
+  .small{font-size:13px;color:#666}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  input[type=file]{padding:6px}
+  .danger{background:#fff;border:1px solid #f5c6cb;color:#b71c1c}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr} .product-row img{width:42px;height:42px} }
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:800">Admin Panel — BabyDressNepal</div>
+  <div><a href="index.html" style="color:#fff;text-decoration:none;font-weight:700">Open Store</a></div>
+</header>
+
+<main class="container">
+  <div class="grid">
+    <section class="card">
+      <h3 style="margin:0">Add / Edit Product</h3>
+      <div class="small muted">Client-side admin (local only). For production, add backend & auth.</div>
+
+      <form id="form" style="margin-top:10px">
+        <input type="hidden" id="prod-id" />
+        <label>Name<input id="name" required /></label>
+        <label>Price (Rs.)<input id="price" type="number" min="0" required /></label>
+        <label>Category<input id="category" placeholder="e.g. Frock, Party, Rompers" /></label>
+        <label>Sizes (comma separated)<input id="sizes" placeholder="0-3M,3-6M,6-12M" /></label>
+        <label>Stock (number)<input id="stock" type="number" min="0" value="10" /></label>
+        <label>Description<textarea id="desc" rows="3"></textarea></label>
+        <label>Image <input id="imgfile" type="file" accept="image/*" /></label>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="saveBtn">Save Product</button>
+          <button id="newBtn" type="button" class="btn-ghost">New</button>
+        </div>
+      </form>
+
+      <div class="tools">
+        <button id="exportBtn" class="btn-ghost">Export JSON</button>
+        <label class="btn-ghost" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+          Import JSON <input id="importFile" type="file" accept=".json" style="display:none"/>
+        </label>
+        <button id="clearAll" class="danger">Delete All Products</button>
+      </div>
+      <div style="margin-top:12px" class="small muted">Tip: Export before clearing or making big changes.</div>
+    </section>
+
+    <section class="card" aria-live="polite">
+      <h3 style="margin:0">Products</h3>
+      <div id="product-list" class="product-list" style="margin-top:10px"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+/* Admin scripts */
+const form = document.getElementById('form');
+const idInput = document.getElementById('prod-id');
+const nameInput = document.getElementById('name');
+const priceInput = document.getElementById('price');
+const categoryInput = document.getElementById('category');
+const sizesInput = document.getElementById('sizes');
+const stockInput = document.getElementById('stock');
+const descInput = document.getElementById('desc');
+const imgFile = document.getElementById('imgfile');
+const productList = document.getElementById('product-list');
+const exportBtn = document.getElementById('exportBtn');
+const importFile = document.getElementById('importFile');
+const clearAllBtn = document.getElementById('clearAll');
+const newBtn = document.getElementById('newBtn');
+
+function loadProducts(){ return JSON.parse(localStorage.getItem('bd_products')||'[]') }
+function saveProducts(p){ localStorage.setItem('bd_products', JSON.stringify(p)) }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8) }
+
+function renderList(){
+  const products = loadProducts();
+  if(products.length===0){ productList.innerHTML = '<div class="small muted">No products yet.</div>'; return; }
+  productList.innerHTML = products.map(p=>`
+    <div class="product-row" data-id="${p.id}">
+      <img src="${p.imageBase64 || placeholder()}" alt="${escapeHtml(p.name)}" />
+      <div>
+        <div style="font-weight:700">${escapeHtml(p.name)} <span class="small" style="color:#999">• Rs.${p.price}</span></div>
+        <div class="small">${escapeHtml(p.category||'')}</div>
+        <div class="small">Sizes: ${(p.sizes||[]).join(', ')} • Stock: ${p.stock}</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ghost" data-act="edit">Edit</button>
+        <button class="btn-ghost" data-act="delete">Delete</button>
+      </div>
+    </div>
+  `).join('');
+  attachRowHandlers();
+}
+
+function placeholder(){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='150'><rect width='100%' height='100%' fill='#fff8f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#ffd6cf' font-size='14'>No Image</text></svg>`;
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+function escapeHtml(s=''){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;') }
+
+function attachRowHandlers(){
+  document.querySelectorAll('.product-row').forEach(row=>{
+    const id = row.getAttribute('data-id');
+    row.querySelector('[data-act="edit"]').addEventListener('click', ()=> editProduct(id));
+    row.querySelector('[data-act="delete"]').addEventListener('click', ()=> deleteProduct(id));
+  });
+}
+
+function editProduct(id){
+  const p = loadProducts().find(x=>x.id===id);
+  if(!p) return alert('Product not found');
+  idInput.value = p.id;
+  nameInput.value = p.name;
+  priceInput.value = p.price;
+  categoryInput.value = p.category || '';
+  sizesInput.value = (p.sizes||[]).join(',');
+  stockInput.value = p.stock || 0;
+  descInput.value = p.description || '';
+  // Note: we don't set file input to base64. Image remains unchanged unless user uploads new file.
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteProduct(id){
+  if(!confirm('Delete this product?')) return;
+  let ps = loadProducts();
+  ps = ps.filter(x=>x.id !== id);
+  saveProducts(ps);
+  renderList();
+  alert('Deleted');
+}
+
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const id = idInput.value || uid();
+  const name = nameInput.value.trim();
+  const price = Number(priceInput.value) || 0;
+  const category = categoryInput.value.trim();
+  const sizes = sizesInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+  const stock = Number(stockInput.value) || 0;
+  const description = descInput.value.trim();
+
+  // handle file -> base64 if provided
+  let imageBase64 = null;
+  if(imgFile.files && imgFile.files[0]){
+    imageBase64 = await fileToBase64(imgFile.files[0]);
+  }
+
+  let products = loadProducts();
+  const existingIdx = products.findIndex(p=>p.id===id);
+  if(existingIdx >= 0){
+    // update
+    products[existingIdx] = {
+      ...products[existingIdx],
+      name, price, category, sizes, stock, description,
+      imageBase64: imageBase64 || products[existingIdx].imageBase64 || ''
+    };
+  } else {
+    products.push({id, name, price, category, sizes, stock, description, imageBase64: imageBase64 || ''});
+  }
+  saveProducts(products);
+  form.reset(); idInput.value='';
+  renderList();
+  alert('Saved product');
+});
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> res(reader.result);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+exportBtn.addEventListener('click', ()=>{
+  const json = JSON.stringify(loadProducts(), null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'bd_products_export.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+importFile.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!Array.isArray(parsed)) throw new Error('Wrong format');
+      if(!confirm('Import will replace current products. Continue?')) return;
+      saveProducts(parsed);
+      renderList();
+      alert('Imported');
+    }catch(err){ alert('Could not import: '+err.message) }
+  };
+  reader.readAsText(f);
+});
+
+clearAllBtn.addEventListener('click', ()=>{
+  if(!confirm('Delete ALL products? This cannot be undone locally.')) return;
+  localStorage.removeItem('bd_products');
+  renderList();
+});
+
+// new form action
+newBtn.addEventListener('click', ()=>{
+  form.reset(); idInput.value='';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// initial render
+renderList();
+
+// quick basic client-side admin guard (not secure) — ask for password stored in localStorage or default
+(function simpleGuard(){
+  const stored = localStorage.getItem('bd_admin_pass') || '';
+  const defaultPass = 'admin123';
+  if(stored === '') {
+    // set default (only local)
+    // DO NOT do this in production
+    localStorage.setItem('bd_admin_pass', defaultPass);
+  }
+  const pass = prompt('Enter admin password (client-side demo):');
+  if(pass === null) { alert('Access denied'); location.href = 'index.html'; return; }
+  if(pass !== localStorage.getItem('bd_admin_pass')){
+    alert('Wrong password');
+    location.href = 'index.html';
+    return;
+  }
+})();
+</script>
+</body>
+</html>

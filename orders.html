@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — Orders</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;background:#f9f7f6;margin:0;color:#222}
+  header{background:#ff6f61;color:#fff;padding:12px;text-align:center}
+  .container{max-width:1000px;margin:14px auto;padding:12px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  button{background:#ff6f61;color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+  .btn-ghost{background:#fff;border:1px solid #eee;color:#333}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .order{background:#fff;padding:10px;border-radius:10px;box-shadow:0 8px 26px rgba(0,0,0,.06);display:flex;gap:10px;align-items:flex-start}
+  .thumb{width:120px;height:160px;object-fit:cover;border-radius:8px;border:1px solid #eee}
+  .meta{flex:1}
+  .small{font-size:13px;color:#666}
+  .actions{display:flex;gap:8px}
+  .badge{padding:6px 8px;border-radius:8px;font-weight:700}
+  .pending{background:#fff4f2;color:#b44}
+  .confirmed{background:#f0fff4;color:#187f2a}
+  pre{white-space:pre-wrap;font-size:13px}
+</style>
+</head>
+<body>
+<header><strong>Admin — Orders</strong></header>
+<main class="container">
+  <div class="toolbar">
+    <button id="refresh">Refresh</button>
+    <button id="export" class="btn-ghost">Export JSON</button>
+    <button id="clearAll" class="btn-ghost" style="color:#b00;border:1px solid #f2c">Clear All</button>
+    <div style="margin-left:auto" class="small">Tip: double-click status to toggle</div>
+  </div>
+
+  <div id="ordersList" class="list"></div>
+  <div id="empty" class="small" style="display:none">No orders yet.</div>
+</main>
+
+<script>
+function loadOrders(){ return JSON.parse(localStorage.getItem('bd_orders')||'[]') }
+function saveOrders(arr){ localStorage.setItem('bd_orders', JSON.stringify(arr)) }
+
+function render(){
+  const list = document.getElementById('ordersList');
+  const arr = loadOrders();
+  list.innerHTML = '';
+  if(arr.length === 0){ document.getElementById('empty').style.display='block'; return; }
+  document.getElementById('empty').style.display='none';
+  arr.forEach(o=>{
+    const el = document.createElement('div'); el.className='order';
+    el.innerHTML = `
+      <img src="${o.screenshot}" class="thumb" alt="screenshot">
+      <div class="meta">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="font-weight:800">${o.buyerName}</div>
+          <div class="small">${o.phone}</div>
+          <div style="margin-left:auto" class="badge ${o.status==='confirmed' ? 'confirmed':'pending'}" data-id="${o.id}">${o.status}</div>
+        </div>
+        <div class="small" style="margin-top:6px">${o.items} • Rs.${o.amount}</div>
+        <div class="small" style="margin-top:6px">${o.address}</div>
+        <div style="margin-top:8px" class="actions">
+          <button class="btn-ghost" data-act="view" data-id="${o.id}">View</button>
+          <button class="btn-ghost" data-act="confirm" data-id="${o.id}">Confirm</button>
+          <button class="btn-ghost" data-act="delete" data-id="${o.id}" style="color:#b00">Delete</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+  attachHandlers();
+}
+
+function attachHandlers(){
+  document.querySelectorAll('[data-act="view"]').forEach(b=>{
+    b.onclick = ()=> {
+      const id=b.getAttribute('data-id');
+      const o = loadOrders().find(x=>x.id===id);
+      if(!o) return alert('Order not found');
+      const info = `Name: ${o.buyerName}\nPhone: ${o.phone}\nItems: ${o.items}\nAmount: Rs.${o.amount}\nPaid Via: ${o.paidVia}\nNote: ${o.note}\nTime: ${o.timestamp}`;
+      const w = window.open('');
+      w.document.body.style.fontFamily = 'system-ui,Arial';
+      w.document.body.innerHTML = `<h3>Order</h3><pre>${info}</pre><img src="${o.screenshot}" style="width:320px;max-width:100%;border:1px solid #eee;border-radius:8px">`;
+    };
+  });
+
+  document.querySelectorAll('[data-act="confirm"]').forEach(b=>{
+    b.onclick = ()=> {
+      const id=b.getAttribute('data-id');
+      let arr = loadOrders();
+      const i = arr.findIndex(x=>x.id===id); if(i===-1) return;
+      arr[i].status = 'confirmed';
+      saveOrders(arr); render();
+    };
+  });
+
+  document.querySelectorAll('[data-act="delete"]').forEach(b=>{
+    b.onclick = ()=> {
+      if(!confirm('Delete order?')) return;
+      const id=b.getAttribute('data-id');
+      let arr = loadOrders().filter(x=>x.id!==id);
+      saveOrders(arr); render();
+    };
+  });
+
+  // toggle status double-click on badge
+  document.querySelectorAll('.badge').forEach(b=>{
+    b.ondblclick = ()=>{
+      const id = b.getAttribute('data-id');
+      let arr = loadOrders();
+      const i = arr.findIndex(x=>x.id===id); if(i===-1) return;
+      arr[i].status = arr[i].status === 'pending' ? 'confirmed' : 'pending';
+      saveOrders(arr); render();
+    };
+  });
+}
+
+document.getElementById('refresh').addEventListener('click', render);
+document.getElementById('export').addEventListener('click', ()=>{
+  const data = JSON.stringify(loadOrders(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'bd_orders.json'; a.click(); URL.revokeObjectURL(url);
+});
+document.getElementById('clearAll').addEventListener('click', ()=>{
+  if(!confirm('Delete ALL orders?')) return;
+  localStorage.removeItem('bd_orders'); render();
+});
+
+render();
+</script>
+</body>
+</html>
